@@ -1,17 +1,15 @@
 package logger
 
 import (
-	"errors"
 	"fmt"
-	"log/syslog"
-	"os"
+	"log"
 	"sync"
 )
 
 var (
 	mu     sync.RWMutex
 	level  Level
-	writer *syslog.Writer
+	writer *log.Logger
 )
 
 type Level uint8
@@ -24,7 +22,7 @@ const (
 	LevelFatal
 )
 
-func SetSyslog(w *syslog.Writer) {
+func SetLogger(w *log.Logger) {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -38,54 +36,37 @@ func SetLogLevel(v Level) {
 	level = v
 }
 
-func write(l Level, msg string) error {
+func write(l Level, msg string) {
 	mu.RLock()
 	defer mu.RUnlock()
 
 	if level > l {
-		return nil
+		return
 	}
 	if writer == nil {
 		fmt.Println(msg)
-		return nil
+		return
 	}
 
-	switch l {
-	case LevelDebug:
-		return writer.Debug(msg)
-	case LevelInfo:
-		return writer.Info(msg)
-	case LevelWarning:
-		return writer.Warning(msg)
-	case LevelError:
-		return writer.Err(msg)
-	case LevelFatal:
-		writer.Crit(msg)
-		os.Exit(1)
-	default:
-		return errors.New("unexpected log level")
-	}
-
-	// Makes compiler happy
-	return nil
+	writer.Println(msg)
 }
 
-func Debug(m string) error {
-	return write(LevelDebug, m)
+func Debug(m string) {
+	write(LevelDebug, m)
 }
 
-func Info(m string) error {
-	return write(LevelInfo, m)
+func Info(m string) {
+	write(LevelInfo, m)
 }
 
-func Warning(m string) error {
-	return write(LevelWarning, m)
+func Warning(m string) {
+	write(LevelWarning, m)
 }
 
-func Error(m string) error {
-	return write(LevelError, m)
+func Error(m string) {
+	write(LevelError, m)
 }
 
-func Fatal(m string) error {
-	return write(LevelFatal, m)
+func Fatal(m string) {
+	write(LevelFatal, m)
 }
