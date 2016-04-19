@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"log"
+	"os"
 	"sync"
 )
 
@@ -69,4 +70,5 @@ func Error(m string) {
 
 func Fatal(m string) {
 	write(LevelFatal, m)
+	os.Exit(1)
 }
