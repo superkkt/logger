@@ -23,6 +23,23 @@ const (
 	LevelFatal
 )
 
+func (r Level) String() string {
+	switch r {
+	case LevelDebug:
+		return "DEBUG"
+	case LevelInfo:
+		return "INFO"
+	case LevelWarning:
+		return "WARNING"
+	case LevelError:
+		return "ERROR"
+	case LevelFatal:
+		return "FATAL"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 func SetLogger(w *log.Logger) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -49,7 +66,7 @@ func write(l Level, msg string) {
 		return
 	}
 
-	writer.Println(msg)
+	writer.Println(fmt.Sprintf("%v: %v", l, msg))
 }
 
 func Debug(m string) {
